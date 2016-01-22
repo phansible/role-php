@@ -18,6 +18,6 @@
               regexp=';?opcache.enable=\d'
               line='opcache.enable=1'
 - name: disable expose_php
-  lineinfile: dest=/etc/php5/fpm/php.ini
+  lineinfile: dest="{{php_config_prefix}}/fpm/php.ini"
               regexp=';?expose_php=\d'
               line='expose_php=0'
