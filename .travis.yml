@@ -20,9 +20,10 @@ script:
   - "ansible-playbook -i tests/inventory tests/$PLAYBOOK --connection=local --sudo"
 
   # Run the role/playbook again, checking to make sure it's idempotent.
+  # Changed is 1 as the packages database will update
   - >
     ansible-playbook -i tests/inventory tests/$PLAYBOOK --connection=local --sudo
-    | grep -q 'changed=0.*failed=0'
+    | grep -q 'changed=1.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
 

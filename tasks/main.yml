@@ -1,7 +1,7 @@
 ---
 - name: Add ppa Repository
   become: yes
-  apt_repository: repo=ppa:ondrej/{{ php.ppa }}
+  apt_repository: repo=ppa:ondrej/{{php.ppa}}
 
 - name: Ensure packages database is up to date
   become: yes
@@ -9,16 +9,16 @@
 
 - name: Install php
   become: yes
-  apt: pkg="{{php_version}}" state=latest
+  apt: pkg="php{{php_version}}" state=latest
 
 - name: Install php-fpm
   become: yes
-  apt: pkg="{{php_version}}-fpm" state=latest
+  apt: pkg="php{{php_version}}-fpm" state=latest
 
 - name: Install PHP Packages
   become: yes
-  apt: pkg={{ item }} state=latest
-  with_items: php.packages
+  apt: pkg=php{{php_version}}-{{item}} state=latest
+  with_items: "{{php.packages}}"
   when: php.packages is defined
 
 - include: configure.yml

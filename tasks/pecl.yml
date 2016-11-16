@@ -21,6 +21,6 @@
   when: php.peclpackages is defined
 
 - name: Enable extension
-  shell: "{% if php_version == 'php5' %}php5enmod{% else %}phpenmod{% endif %} {{ item }}"
+  shell: "phpenmod {{ item }}"
   with_items: php.peclpackages
   when: php.peclpackages is defined

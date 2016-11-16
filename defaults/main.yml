@@ -1,9 +1,13 @@
 ---
 server:
     timezone: "Europe/London"
-php:
-    ppa: "php5-5.6"
-    packages: ["php5-cli", "php5-intl", "php5-mcrypt"]
 
-php_version: "{% if php.ppa == 'php-7.0' %}php7.0{% else %}php5{% endif %}"
-php_config_prefix: "{% if php.ppa == 'php-7.0' %}/etc/php/7.0{% else %}/etc/php5{% endif %}"
+php:
+    ppa: "php"
+    packages:
+        - "cli"
+        - "intl"
+        - "mcrypt"
+
+php_version: 5.6
+php_config_prefix: "/etc/php/{{php_version}}"
