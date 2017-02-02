@@ -3,7 +3,6 @@ server:
     timezone: "Europe/London"
 
 php:
-    ppa: "php"
     packages:
         - "cli"
         - "intl"
