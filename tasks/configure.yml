@@ -8,12 +8,11 @@
 - stat: path="{{ php_config_prefix }}/cli/php.ini"
   register: phpcli
 
-- include: php-fpm.yml
+- import_tasks: php-fpm.yml
   when: phpfpm.stat.exists
 
-- include: php-cli.yml
+- import_tasks: php-cli.yml
   when: phpcli.stat.exists
 
-- include: mod-php.yml
+- import_tasks: mod-php.yml
   when: modphp.stat.exists
-
