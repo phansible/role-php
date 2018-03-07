@@ -21,6 +21,6 @@
   with_items: "{{ php.packages }}"
   when: php.packages is defined
 
-- include: configure.yml
+- import_tasks: configure.yml
 
-- include: pecl.yml
+- import_tasks: pecl.yml
