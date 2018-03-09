@@ -24,7 +24,7 @@ script:
   # Changed is 1 as the packages database will update
   - >
     ansible-playbook -i tests/inventory tests/$PLAYBOOK --connection=local --become
-    | grep -q 'changed=1.*failed=0'
+    | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
 
