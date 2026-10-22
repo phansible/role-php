@@ -10,23 +10,23 @@
   become: yes
   file: path=/etc/apt/keyrings state=directory mode=0755
 
-# fetched once to a file: keyserver output is not byte-stable, so a signed_by URL is never idempotent
 - name: Add PHP repository key
   become: yes
   get_url:
-    url: "{{ php_repository[ansible_facts.distribution].key }}"
-    dest: "{{ php_repository[ansible_facts.distribution].key_file }}"
+    url: https://packages.sury.org/php/apt.gpg
+    dest: /etc/apt/keyrings/php.gpg
     mode: '0644'
     force: no
 
+# sury is the canonical source for both distros; the ondrej PPA is being merged into it
 - name: Add PHP repository
   become: yes
   deb822_repository:
     name: php
-    uris: "{{ php_repository[ansible_facts.distribution].uri }}"
+    uris: https://packages.sury.org/php/
     suites: "{{ ansible_facts.distribution_release }}"
     components: main
-    signed_by: "{{ php_repository[ansible_facts.distribution].key_file }}"
+    signed_by: /etc/apt/keyrings/php.gpg
     install_python_debian: yes
   register: php_repo
 
