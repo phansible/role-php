@@ -1,7 +1,12 @@
 ---
-- name: Add ppa Repository
+- name: Add PHP repository
   become: yes
-  apt_repository: repo=ppa:ondrej/php
+  deb822_repository:
+    name: php
+    uris: "{{ php_repository[ansible_facts.distribution].uri }}"
+    suites: "{{ ansible_facts.distribution_release }}"
+    components: main
+    signed_by: "{{ php_repository[ansible_facts.distribution].key }}"
 
 - name: Ensure packages database is up to date
   become: yes
@@ -9,16 +14,15 @@
 
 - name: Install php
   become: yes
-  apt: pkg="php{{ php_version }}" state=latest
-
-- name: Install php-fpm
-  become: yes
-  apt: pkg="php{{ php_version }}-fpm" state=latest
+  apt:
+    pkg: ["php{{ php_version }}", "php{{ php_version }}-fpm"]
+    state: latest
 
 - name: Install PHP Packages
   become: yes
-  apt: pkg=php{{ php_version }}-{{ item }} state=latest
-  with_items: "{{ php.packages }}"
+  apt:
+    pkg: "{{ php.packages | map('regex_replace', '^', 'php' ~ php_version ~ '-') | list }}"
+    state: latest
   when: php.packages is defined
 
 - import_tasks: configure.yml

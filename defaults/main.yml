@@ -6,7 +6,6 @@ php:
     packages:
         - "cli"
         - "intl"
-        - "mcrypt"
 
-php_version: 5.6
+php_version: "8.4"
 php_config_prefix: "/etc/php/{{php_version}}"
