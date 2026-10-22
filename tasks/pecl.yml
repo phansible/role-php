@@ -1,5 +1,5 @@
 - name: Install php-dev
-  apt: pkg="{{ php_version }}-dev" state=present
+  apt: pkg="php{{ php_version }}-dev" state=present
   when: php.peclpackages is defined
 
 - name: Install Package

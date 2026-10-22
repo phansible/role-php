@@ -1,24 +1,51 @@
 ---
-- name: Add ppa Repository
+- name: Install repository prerequisites
   become: yes
-  apt_repository: repo=ppa:ondrej/php
+  apt:
+    pkg: ca-certificates
+    update_cache: yes
+    cache_valid_time: 3600
 
-- name: Ensure packages database is up to date
+- name: Ensure apt keyrings directory exists
   become: yes
-  apt: update_cache=yes cache_valid_time=3600
+  file: path=/etc/apt/keyrings state=directory mode=0755
+
+- name: Add PHP repository key
+  become: yes
+  get_url:
+    url: https://packages.sury.org/php/apt.gpg
+    dest: /etc/apt/keyrings/php.gpg
+    mode: '0644'
+    force: no
+
+# sury is the canonical source for both distros; the ondrej PPA is being merged into it
+- name: Add PHP repository
+  become: yes
+  deb822_repository:
+    name: php
+    uris: https://packages.sury.org/php/
+    suites: "{{ ansible_facts.distribution_release }}"
+    components: main
+    signed_by: /etc/apt/keyrings/php.gpg
+    install_python_debian: yes
+  register: php_repo
+
+- name: Update packages database for the PHP repository
+  become: yes
+  apt: update_cache=yes
+  when: php_repo is changed
 
 - name: Install php
   become: yes
-  apt: pkg="php{{ php_version }}" state=latest
-
-- name: Install php-fpm
-  become: yes
-  apt: pkg="php{{ php_version }}-fpm" state=latest
+  apt:
+    pkg: ["php{{ php_version }}", "php{{ php_version }}-fpm"]
+    state: latest
 
 - name: Install PHP Packages
   become: yes
-  apt: pkg=php{{ php_version }}-{{ item }} state=latest
-  with_items: "{{ php.packages }}"
+  apt:
+    pkg: "{{ php.packages | map('regex_replace', '^', 'php' ~ php_version ~ '-') | list }}"
+    state: latest
   when: php.packages is defined
 
 - import_tasks: configure.yml
