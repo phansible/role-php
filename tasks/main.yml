@@ -7,6 +7,7 @@
     suites: "{{ ansible_facts.distribution_release }}"
     components: main
     signed_by: "{{ php_repository[ansible_facts.distribution].key }}"
+    install_python_debian: yes
 
 - name: Ensure packages database is up to date
   become: yes

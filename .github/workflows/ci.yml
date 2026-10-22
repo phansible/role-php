@@ -10,33 +10,41 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: [ubuntu2204, ubuntu2404, ubuntu2604, debian12, debian13]
+        image: ['ubuntu:22.04', 'ubuntu:24.04', 'ubuntu:26.04', 'debian:12', 'debian:13']
         php: ['8.2', '8.3', '8.4', '8.5']
-    name: ${{ matrix.distro }} / php ${{ matrix.php }}
+    name: ${{ matrix.image }} / php ${{ matrix.php }}
     env:
-      PLAYBOOK: /etc/ansible/roles/role-php/tests/test.yml
+      ANSIBLE_ROLES_PATH: ..
       ANSIBLE_FORCE_COLOR: '1'
+      PLAYBOOK: ansible-playbook -i test, -c community.docker.docker tests/test.yml -e php_version=${{ matrix.php }}
     steps:
       - uses: actions/checkout@v4
 
-      # systemd-enabled image with ansible preinstalled, so services can start like on a real box
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13' # newest 3.x breaks ansible-core
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      # official image plus only what Ansible and services need: python3 and systemd as PID 1
       - name: Start test container
-        run: >
-          docker run -d --name test --privileged --cgroupns=host
-          -v /sys/fs/cgroup:/sys/fs/cgroup:rw
-          -v "$PWD":/etc/ansible/roles/role-php:ro
-          geerlingguy/docker-${{ matrix.distro }}-ansible:latest
+        run: |
+          docker build -t test-image - <<EOF
+          FROM ${{ matrix.image }}
+          RUN apt-get update && apt-get install -y --no-install-recommends python3 systemd systemd-sysv && rm -rf /var/lib/apt/lists/*
+          CMD ["/lib/systemd/systemd"]
+          EOF
+          docker run -d --name test --privileged --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup:rw test-image
 
       - name: Check the role/playbook's syntax
-        run: docker exec test ansible-playbook $PLAYBOOK --syntax-check
+        run: $PLAYBOOK --syntax-check
 
       - name: Run the role/playbook
-        run: docker exec test ansible-playbook $PLAYBOOK -e php_version=${{ matrix.php }}
+        run: $PLAYBOOK
 
       - name: Run the role/playbook again, checking to make sure it's idempotent
-        run: >
-          docker exec test ansible-playbook $PLAYBOOK -e php_version=${{ matrix.php }}
-          | tee /dev/stderr | grep -q 'changed=0.*failed=0'
+        run: $PLAYBOOK | tee /dev/stderr | grep -q 'changed=0.*failed=0'
 
       - name: Check the requested PHP version is installed and working
         run: >
