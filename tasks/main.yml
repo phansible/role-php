@@ -6,6 +6,19 @@
     update_cache: yes
     cache_valid_time: 3600
 
+- name: Ensure apt keyrings directory exists
+  become: yes
+  file: path=/etc/apt/keyrings state=directory mode=0755
+
+# fetched once to a file: keyserver output is not byte-stable, so a signed_by URL is never idempotent
+- name: Add PHP repository key
+  become: yes
+  get_url:
+    url: "{{ php_repository[ansible_facts.distribution].key }}"
+    dest: "{{ php_repository[ansible_facts.distribution].key_file }}"
+    mode: '0644'
+    force: no
+
 - name: Add PHP repository
   become: yes
   deb822_repository:
@@ -13,12 +26,14 @@
     uris: "{{ php_repository[ansible_facts.distribution].uri }}"
     suites: "{{ ansible_facts.distribution_release }}"
     components: main
-    signed_by: "{{ php_repository[ansible_facts.distribution].key }}"
+    signed_by: "{{ php_repository[ansible_facts.distribution].key_file }}"
     install_python_debian: yes
+  register: php_repo
 
-- name: Ensure packages database is up to date
+- name: Update packages database for the PHP repository
   become: yes
-  apt: update_cache=yes cache_valid_time=3600
+  apt: update_cache=yes
+  when: php_repo is changed
 
 - name: Install php
   become: yes
