@@ -1,6 +1,6 @@
 # Phansible Role: PHP
 
-[![Build Status](https://travis-ci.org/phansible/role-php.svg?branch=master)](https://travis-ci.org/phansible/role-php)
+[![CI](https://github.com/phansible/role-php/actions/workflows/ci.yml/badge.svg)](https://github.com/phansible/role-php/actions/workflows/ci.yml)
 
 An Ansible Role that installs [PHP](http://php.net/) on Ubuntu specifically created with [Phansible](http://phansible.com/) in mind.
 
