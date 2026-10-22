@@ -1,4 +1,11 @@
 ---
+- name: Install repository prerequisites
+  become: yes
+  apt:
+    pkg: ca-certificates
+    update_cache: yes
+    cache_valid_time: 3600
+
 - name: Add PHP repository
   become: yes
   deb822_repository:
